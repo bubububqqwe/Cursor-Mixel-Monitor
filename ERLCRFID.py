@@ -1,14 +1,16 @@
 import pyautogui
 import keyboard
 import time
-from PIL import ImageGrab
+from PIL import ImageGrab, Image
+import numpy as np
+import cv2
 
 # Settings
 area_size = 3  # Size of the area around the mouse to monitor (in pixels)
 toggle_key = 't'  # Key to toggle the monitoring on and off
-interval = 0.000001  # Time interval for checking the pixel area (in seconds)
+interval = 0.00001  # Time interval for checking the pixel area (in seconds)
 target_color = (211, 211, 211)  # The RGB color to detect (example: medium grey)
-tolerance = 30  # Tolerance for color similarity
+tolerance = 50  # Tolerance for color similarity
 change_buffer = 100  # Number of frames to buffer for detecting significant color change
 
 monitoring = False
@@ -94,9 +96,20 @@ try:
                 monitoring = False  # Stop monitoring after the click
                 initial_image = None  # Reset the initial image
                 recent_colors = []  # Clear the color buffer
+            
+            # Display the monitored area in a window
+            img_array = np.array(current_image)
+            img_resized = cv2.resize(img_array, (300, 300), interpolation=cv2.INTER_NEAREST)
+            cv2.imshow("Monitored Area", cv2.cvtColor(img_resized, cv2.COLOR_RGB2BGR))
+            
+        if cv2.waitKey(1) & 0xFF == ord('q'):
+            break
         
         time.sleep(interval)
 
 except KeyboardInterrupt:
     print("Script terminated.")
+finally:
+    cv2.destroyAllWindows()
+
 
